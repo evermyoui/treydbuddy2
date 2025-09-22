@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TreydBuddy — Student Dashboard</title>
+  <link rel="stylesheet" href="student.css" />
+</head>
+<body>
+  <div class="layout">
+    <!-- ============ Sidebar ============ -->
+    <aside class="sidebar" id="sidebar" aria-label="Student navigation">
+      <a class="brand" href="#">
+        <span class="logo">TB</span>
+        <span>TreydBuddy</span>
+      </a>
+
+      <nav class="nav" id="nav">
+        <a class="nav-link active" href="#events" data-target="events" aria-current="page">
+          <span class="icon">🎉</span> Events
+        </a>
+        <a class="nav-link" href="#my-reservations" data-target="my-reservations">
+          <span class="icon">🧾</span> My Reservations
+        </a>
+        <a class="nav-link" href="#attendance" data-target="attendance">
+          <span class="icon">🗂️</span> Attendance
+        </a>
+        <a class="nav-link" href="#billing" data-target="billing">
+          <span class="icon">💳</span> Billing
+        </a>
+        <a class="nav-link" href="#profile" data-target="profile">
+          <span class="icon">🧑‍🎓</span> Profile
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+      <form id="logoutForm" data-redirect="login.html">
+    <button type="submit" class="btn btn-ghost" style="width:100%;">Sign out</button>
+  </form>
+</div>
+
+    </aside>
+
+    <!-- ============ Main ============ -->
+    <div class="main">
+      <!-- Topbar -->
+      <header class="topbar">
+        <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="sidebar">☰</button>
+
+        <div class="search" role="search">
+          <form id="searchForm" action="#" onsubmit="return false;">
+            <input class="input" id="searchInput" type="search" name="q" placeholder="Search upcoming events…" />
+          </form>
+        </div>
+
+        <div class="account">
+          <div class="avatar" aria-label="Student account" id="avatarInitials">ST</div>
+        </div>
+      </header>
+
+      <!-- ============ SPA Content Area ============ -->
+      <main class="content" id="content" tabindex="-1" aria-live="polite">
+
+        <!-- ===== Events (Explore) ===== -->
+        <section class="route" id="route-events">
+          <section class="cards">
+            <article class="card kpi">
+              <div class="kpi-head">
+                <span class="kpi-title">Upcoming Events</span>
+                <span class="kpi-icon">🎉</span>
+              </div>
+              <div class="kpi-value" id="kpiUpcoming">—</div>
+              <div class="kpi-sub">open for reservation</div>
+            </article>
+
+            <article class="card kpi">
+              <div class="kpi-head">
+                <span class="kpi-title">My Reservations</span>
+                <span class="kpi-icon">🧾</span>
+              </div>
+              <div class="kpi-value" id="kpiMyRes">—</div>
+              <div class="kpi-sub">active</div>
+            </article>
+
+            <article class="card kpi">
+              <div class="kpi-head">
+                <span class="kpi-title">Payments Due</span>
+                <span class="kpi-icon">💳</span>
+              </div>
+              <div class="kpi-value" id="kpiDue">—</div>
+              <div class="kpi-sub">billing items</div>
+            </article>
+          </section>
+
+          <article class="card table-card">
+            <div class="table-head">
+              <h2 class="section-title">Explore events</h2>
+            </div>
+
+            <div class="table-wrap">
+              <table class="table" id="tblEvents">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Date</th>
+                    <th>Slots</th>
+                    <th>Reserved</th>
+                    <th>Status</th>
+                    <th class="t-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody><!-- filled by JS --></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <!-- ===== My Reservations ===== -->
+        <section class="route" id="route-my-reservations" hidden>
+          <article class="card table-card">
+            <div class="table-head">
+              <h2 class="section-title">My reservations</h2>
+            </div>
+
+            <div class="table-wrap">
+              <table class="table" id="tblMyReservations">
+                <thead>
+                  <tr>
+                    <th>Event</th>
+                    <th>Reserved on</th>
+                    <th>Payment</th>
+                    <th>Status</th>
+                    <th class="t-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody><!-- filled by JS --></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <!-- ===== Attendance ===== -->
+        <section class="route" id="route-attendance" hidden>
+          <article class="card">
+            <h2 class="section-title">Attendance history</h2>
+
+            <div class="table-wrap">
+              <table class="table" id="tblAttendance">
+                <thead>
+                  <tr>
+                    <th>Event</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody><!-- filled by JS --></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <!-- ===== Billing ===== -->
+        <section class="route" id="route-billing" hidden>
+          <article class="card table-card">
+            <div class="table-head">
+              <h2 class="section-title">Billing & payments</h2>
+              <button class="btn btn-primary" data-open="modal-schedule">Schedule payment</button>
+            </div>
+
+            <div class="table-wrap">
+              <table class="table" id="tblBilling">
+                <thead>
+                  <tr>
+                    <th>Invoice #</th>
+                    <th>Event</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th class="t-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody><!-- filled by JS --></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <!-- ===== Profile  ===== -->
+        <section class="route" id="route-profile" hidden>
+          <article class="card profile-card">
+            <div class="profile-head">
+              <div class="profile-avatar" id="profileAvatar" aria-hidden="true">ST</div>
+              <div class="profile-meta">
+                <h2 class="section-title" id="profileName">Student Name</h2>
+                <p class="muted" id="profileEmail">name@student.bpsu.edu.ph</p>
+              </div>
+
+              <div class="profile-actions">
+                <button class="btn btn-primary" id="btnEditProfile">Edit</button>
+                <button class="btn btn-ghost" id="btnCancelEdit" hidden>Cancel</button>
+                <button class="btn btn-primary" id="btnSaveProfile" hidden>Save</button>
+              </div>
+            </div>
+
+            <form id="formProfile" class="profile-form" autocomplete="off">
+              <div class="grid-2">
+                <label>
+                  <span class="label">Student ID</span>
+                  <input class="input" name="studentId" id="pfId" disabled />
+                </label>
+
+                <label>
+                  <span class="label">Program</span>
+                  <input class="input" name="program" id="pfProgram" disabled />
+                </label>
+              </div>
+
+              <div class="grid-2">
+                <label>
+                  <span class="label">First name</span>
+                  <input class="input" name="fname" id="pfFname" disabled required />
+                </label>
+
+                <label>
+                  <span class="label">Last name</span>
+                  <input class="input" name="lname" id="pfLname" disabled required />
+                </label>
+              </div>
+
+              <div class="grid-2">
+                <label>
+                  <span class="label">Email</span>
+                  <input class="input" type="email" name="email" id="pfEmail" disabled required />
+                </label>
+
+                <label>
+                  <span class="label">Contact No.</span>
+                  <input class="input" name="phone" id="pfPhone" disabled />
+                </label>
+              </div>
+
+              <label>
+                <span class="label">Address</span>
+                <input class="input" name="address" id="pfAddress" disabled />
+              </label>
+
+             
+            </form>
+          </article>
+        </section>
+      </main>
+    </div>
+  </div>
+
+ 
+  <dialog class="modal" id="modal-reserve">
+    <form class="modal-card" id="formReserve">
+      <h3 class="modal-title">Reserve a ticket</h3>
+      <label>
+        <span class="label">Event</span>
+        <input class="input" name="event" id="reserveEvent" readonly />
+      </label>
+      <div class="grid-2">
+        <label>
+          <span class="label">Quantity</span>
+          <input class="input" type="number" name="qty" min="1" value="1" required />
+        </label>
+        <label>
+          <span class="label">Payment option</span>
+          <select class="input" name="payment" required>
+            <option value="Full">Full payment</option>
+            <option value="Schedule">Schedule (installment)</option>
+          </select>
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+        <button type="submit" class="btn btn-primary">Reserve</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="modal" id="modal-schedule">
+    <form class="modal-card" id="formSchedule">
+      <h3 class="modal-title">Schedule a payment</h3>
+      <label>
+        <span class="label">Invoice #</span>
+        <select class="input" name="invoice" id="scheduleInvoice" required></select>
+      </label>
+      <div class="grid-2">
+        <label>
+          <span class="label">First due date</span>
+          <input class="input" type="date" name="date" required />
+        </label>
+        <label>
+          <span class="label">Number of parts</span>
+          <input class="input" type="number" name="parts" min="2" max="6" value="2" required />
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+        <button type="submit" class="btn btn-primary">Save schedule</button>
+      </div>
+    </form>
+  </dialog>
+
+  
+</body>
+</html>

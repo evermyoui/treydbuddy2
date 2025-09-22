@@ -1,0 +1,323 @@
+/* ===========================
+   TreydBuddy Auth Styles — Light Theme (Expanded)
+   Palette: F8F2DE, ECDCBF, A31D1D, D84040
+   =========================== */
+
+:root {
+  --bg: #F8F2DE;        /* Page background (cream) */
+  --card: #ECDCBF;      /* Panels/cards (beige) */
+  --surface: #FFFFFF;   /* Form fields / inner cards */
+  --accent: #A31D1D;    /* Primary accent (buttons, links) */
+  --accent-2: #D84040;  /* Secondary accent (hover) */
+  --text: #222222;      /* Main text */
+  --muted: #5E5E5E;     /* Sub text */
+  --line: #D9CDB1;      /* Light border on beige */
+  --line2: #E9E6DB;     /* Light border on white */
+  --focus: rgba(163, 29, 29, 0.25);
+  --radius-xl: 18px;
+  --radius: 12px;
+  --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.12);
+  --shadow-md: 0 10px 22px rgba(0, 0, 0, 0.10);
+  --shadow-soft: inset 0 1px 0 rgba(255, 255, 255, 0.60);
+  --maxw: 1080px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+/* ===========================
+   Layout
+   =========================== */
+
+.auth-shell {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 32px 20px;
+  background:
+    radial-gradient(400px 220px at 12% -8%, rgba(216, 64, 64, 0.08), transparent 60%),
+    radial-gradient(380px 220px at 88% 108%, rgba(163, 29, 29, 0.06), transparent 60%),
+    var(--bg);
+}
+
+.auth {
+  width: 100%;
+  max-width: var(--maxw);
+  background: var(--card);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+
+@media (max-width: 960px) {
+  .auth {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===========================
+   Left hero panel
+   =========================== */
+
+.auth-hero {
+  position: relative;
+  padding: 48px 44px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.55),
+      rgba(255, 255, 255, 0.25) 55%,
+      rgba(255, 255, 255, 0.15) 100%
+    ),
+    var(--card);
+  border-right: 1px solid var(--line);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  text-decoration: none;
+  color: var(--text);
+}
+
+.brand .logo {
+  width: 42px;
+  height: 42px;
+  border-radius: 11px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  box-shadow: 0 10px 18px rgba(163, 29, 29, 0.22);
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  color: #FFFFFF;
+}
+
+.hero-title {
+  margin: 28px 0 10px;
+  font-size: clamp(28px, 3.3vw, 40px);
+  line-height: 1.15;
+  color: #1B1B1B;
+}
+
+.hero-sub {
+  color: var(--muted);
+  max-width: 55ch;
+  margin-bottom: 28px;
+}
+
+.hero-list {
+  display: grid;
+  gap: 12px;
+  margin: 24px 0 40px;
+  color: #2D2D2D;
+}
+
+.hero-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.check {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  color: #FFFFFF;
+  margin-top: 2px;
+  box-shadow: 0 6px 14px rgba(163, 29, 29, 0.22);
+}
+
+.hero-footnote {
+  font-size: 14px;
+  color: var(--muted);
+  opacity: 0.95;
+}
+
+/* ===========================
+   Right form panel
+   =========================== */
+
+.auth-form {
+  padding: 44px 36px;
+  display: grid;
+  align-content: center;
+  gap: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.30) 50%),
+    var(--card);
+}
+
+.form-card {
+  background: var(--surface);
+  border: 1px solid var(--line2);
+  border-radius: var(--radius);
+  padding: 28px;
+  box-shadow: var(--shadow-md), var(--shadow-soft);
+}
+
+.form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.form-header h2 {
+  margin: 0;
+  font-size: 22px;
+  color: #1A1A1A;
+}
+
+.form-header a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.form-row {
+  display: grid;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.label {
+  font-size: 14px;
+  color: #3B3B3B;
+  margin-bottom: 6px;
+}
+
+/* ===========================
+   Inputs / Selects
+   =========================== */
+
+.input,
+.select {
+  width: 100%;
+  appearance: none;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid #D8D8D8;
+  border-radius: 12px;
+  padding: 14px 14px;
+  outline: none;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease,
+    transform 120ms ease;
+}
+
+.input:focus,
+.select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 6px var(--focus);
+}
+
+.input::placeholder {
+  color: #8B8B8B;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+@media (max-width: 520px) {
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===========================
+   Actions / Buttons
+   =========================== */
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 6px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  text-decoration: none;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #FFFFFF;
+  box-shadow: 0 10px 18px rgba(163, 29, 29, 0.25);
+}
+
+.btn-primary:hover {
+  filter: brightness(1.03);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-ghost {
+  background: var(--surface);
+  border: 1px solid #DBDBDB;
+  color: #333333;
+}
+
+.help {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* ===========================
+   Utilities
+   =========================== */
+
+.visually-hidden {
+  position: absolute !important;
+  clip: rect(1px, 1px, 1px, 1px);
+  padding: 0 !important;
+  border: 0 !important;
+  height: 1px !important;
+  width: 1px !important;
+  overflow: hidden;
+  white-space: nowrap;
+}

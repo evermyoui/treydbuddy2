@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TreydBuddy — Admin Dashboard</title>
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+<body>
+  <div class="layout">
+    <!-- ============ Sidebar ============ -->
+    <aside class="sidebar" id="sidebar" aria-label="Admin navigation">
+      <a class="brand" href="#">
+        <span class="logo">TB</span>
+        <span>TreydBuddy</span>
+      </a>
+
+      <nav class="nav" id="nav">
+        <a class="nav-link active" href="#overview" data-target="overview" aria-current="page">
+          <span class="icon">🏠</span> Overview
+        </a>
+        <a class="nav-link" href="#events" data-target="events">
+          <span class="icon">🎉</span> Events
+        </a>
+        <a class="nav-link" href="#reservations" data-target="reservations">
+          <span class="icon">🧾</span> Reservations
+        </a>
+        <a class="nav-link" href="#attendance" data-target="attendance">
+          <span class="icon">🗂️</span> Attendance
+        </a>
+        <a class="nav-link" href="#users" data-target="users">
+          <span class="icon">👥</span> Users
+        </a>
+        <a class="nav-link" href="#billing" data-target="billing">
+          <span class="icon">💳</span> Billing
+        </a>
+      </nav>
+
+<div class="sidebar-footer">
+ 
+  <form id="logoutForm" data-redirect="login.html">
+    <button type="submit" class="btn btn-ghost" style="width:100%;">Sign out</button>
+  </form>
+</div>
+
+    </aside>
+
+    <!-- ============ Main ============ -->
+    <div class="main">
+      <!-- Topbar -->
+      <header class="topbar">
+        <button class="menu-btn" id="menuBtn" aria-expanded="false" aria-controls="sidebar">☰</button>
+
+        <div class="search" role="search">
+          <form id="searchForm" action="#" onsubmit="return false;">
+            <input class="input" id="searchInput" type="search" name="q" placeholder="Search events, users, reservations…" />
+          </form>
+        </div>
+
+        <div class="account">
+          <div class="avatar" aria-label="Admin account">AD</div>
+        </div>
+      </header>
+
+      <!-- ============ SPA Content Area ============ -->
+      <main class="content" id="content" tabindex="-1" aria-live="polite">
+        <!-- ===== Overview ===== -->
+        <section class="route" id="route-overview">
+          <section class="cards">
+            <article class="card kpi">
+              <div class="kpi-head">
+                <span class="kpi-title">Students</span>
+                <span class="kpi-icon">👥</span>
+              </div>
+              <div class="kpi-value" id="kpiStudents">—</div>
+              <div class="kpi-sub" id="kpiStudentsSub">loading…</div>
+            </article>
+
+            <article class="card kpi">
+              <div class="kpi-head">
+                <span class="kpi-title">Upcoming Events</span>
+                <span class="kpi-icon">🎉</span>
+              </div>
+              <div class="kpi-value" id="kpiEvents">—</div>
+              <div class="kpi-sub" id="kpiEventsSub">loading…</div>
+            </article>
+
+            <article class="card kpi">
+              <div class="kpi-head">
+                <span class="kpi-title">Reservations Today</span>
+                <span class="kpi-icon">🧾</span>
+              </div>
+              <div class="kpi-value" id="kpiReservations">—</div>
+              <div class="kpi-sub" id="kpiReservationsSub">loading…</div>
+            </article>
+
+            <article class="card kpi">
+              <div class="kpi-head">
+                <span class="kpi-title">Pending Payments</span>
+                <span class="kpi-icon">⏳</span>
+              </div>
+              <div class="kpi-value" id="kpiPending">—</div>
+              <div class="kpi-sub" id="kpiPendingSub">loading…</div>
+            </article>
+          </section>
+
+          <section class="quick-actions card">
+            <h2 class="section-title">Quick actions</h2>
+            <div class="qa-grid">
+              <button class="btn btn-primary" data-open="modal-event">Create event</button>
+              <!-- When opening Add student from here, we also move to Users route -->
+              <button class="btn btn-primary" data-open="modal-user" data-route="users">Add student</button>
+              <button class="btn btn-ghost" data-open="modal-attendance">Upload attendance</button>
+              <a class="btn btn-ghost" href="#billing" data-target="billing">Go to billing</a>
+            </div>
+          </section>
+
+          <section class="grid-2">
+            <article class="card table-card">
+              <div class="table-head">
+                <h2 class="section-title">Upcoming events</h2>
+                <a class="link" href="#events" data-target="events">View all</a>
+              </div>
+              <div class="table-wrap">
+                <table class="table" id="tableUpcoming">
+                  <thead>
+                    <tr>
+                      <th>Title</th>
+                      <th>Date</th>
+                      <th>Slots</th>
+                      <th>Reserved</th>
+                      <th>Status</th>
+                      <th class="t-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody><!-- filled by JS --></tbody>
+                </table>
+              </div>
+            </article>
+
+            <article class="card">
+              <h2 class="section-title">Attendance overview</h2>
+              <div class="bars">
+                <div class="bar">
+                  <span class="bar-label">This week</span>
+                  <div class="bar-track"><div class="bar-fill" id="barWeek"></div></div>
+                  <span class="bar-value" id="barWeekVal">—</span>
+                </div>
+                <div class="bar">
+                  <span class="bar-label">Last week</span>
+                  <div class="bar-track"><div class="bar-fill" id="barLast"></div></div>
+                  <span class="bar-value" id="barLastVal">—</span>
+                </div>
+                <div class="bar">
+                  <span class="bar-label">Semester</span>
+                  <div class="bar-track"><div class="bar-fill" id="barSem"></div></div>
+                  <span class="bar-value" id="barSemVal">—</span>
+                </div>
+              </div>
+              <p class="help">Upload a CSV from scanners via Attendance → Upload.</p>
+            </article>
+          </section>
+
+          <section class="card table-card">
+            <div class="table-head">
+              <h2 class="section-title">Recent reservations</h2>
+              <a class="link" href="#reservations" data-target="reservations">View all</a>
+            </div>
+            <div class="table-wrap">
+              <table class="table" id="tableRecentReservations">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Event</th>
+                    <th>Reserved on</th>
+                    <th>Payment</th>
+                    <th>Status</th>
+                    <th class="t-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody><!-- filled by JS --></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <!-- ===== Events ===== -->
+        <section class="route" id="route-events" hidden>
+          <article class="card">
+            <div class="table-head">
+              <h2 class="section-title">Events</h2>
+              <button class="btn btn-primary" data-open="modal-event">Create event</button>
+            </div>
+            <div class="table-wrap">
+              <table class="table" id="tableEvents">
+                <thead>
+                  <tr>
+                    <th>Title</th>
+                    <th>Date</th>
+                    <th>Slots</th>
+                    <th>Reserved</th>
+                    <th>Status</th>
+                    <th class="t-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody><!-- filled by JS --></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <!-- ===== Reservations ===== -->
+        <section class="route" id="route-reservations" hidden>
+          <article class="card">
+            <div class="table-head">
+              <h2 class="section-title">Reservations</h2>
+            </div>
+            <div class="table-wrap">
+              <table class="table" id="tableReservations">
+                <thead>
+                  <tr>
+                    <th>Student</th>
+                    <th>Event</th>
+                    <th>Reserved on</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th class="t-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody><!-- filled by JS --></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <!-- ===== Attendance ===== -->
+        <section class="route" id="route-attendance" hidden>
+          <article class="card">
+            <div class="table-head">
+              <h2 class="section-title">Attendance</h2>
+              <button class="btn btn-ghost" data-open="modal-attendance">Upload attendance</button>
+            </div>
+            <div class="table-wrap">
+              <table class="table" id="tableAttendance">
+                <thead>
+                  <tr>
+                    <th>Event</th>
+                    <th>Date</th>
+                    <th>Checked in</th>
+                    <th>Total</th>
+                    <th class="t-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody><!-- filled by JS --></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <!-- ===== Users ===== -->
+        <section class="route" id="route-users" hidden>
+          <article class="card">
+            <div class="table-head">
+              <h2 class="section-title">Users</h2>
+              <button class="btn btn-primary" data-open="modal-user">Add student</button>
+            </div>
+            <div class="table-wrap">
+              <table class="table" id="tableUsers">
+                <thead>
+                  <tr>
+                    <th>ID No.</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Program</th>
+                    <th class="t-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody><!-- filled by JS --></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <!-- ===== Billing ===== -->
+        <section class="route" id="route-billing" hidden>
+          <article class="card">
+            <div class="table-head">
+              <h2 class="section-title">Billing</h2>
+            </div>
+            <div class="table-wrap">
+              <table class="table" id="tableBilling">
+                <thead>
+                  <tr>
+                    <th>Invoice #</th>
+                    <th>Student</th>
+                    <th>Event</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th class="t-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody><!-- filled by JS --></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <!-- ============ Modals ============ -->
+  <!-- Create/Edit Event -->
+  <dialog class="modal" id="modal-event">
+    <form class="modal-card" id="formEvent">
+      <h3 class="modal-title">Create event</h3>
+      <div class="grid-2">
+        <label>
+          <span class="label">Title</span>
+          <input class="input" name="title" required />
+        </label>
+        <label>
+          <span class="label">Date</span>
+          <input class="input" type="date" name="date" required />
+        </label>
+      </div>
+      <div class="grid-2">
+        <label>
+          <span class="label">Slots</span>
+          <input class="input" type="number" name="slots" min="1" required />
+        </label>
+        <label>
+          <span class="label">Status</span>
+          <select class="input" name="status" required>
+            <option value="Open">Open</option>
+            <option value="Filling">Filling</option>
+            <option value="Full">Full</option>
+          </select>
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Add Student -->
+  <dialog class="modal" id="modal-user">
+    <form class="modal-card" id="formUser">
+      <h3 class="modal-title">Add student</h3>
+      <div class="grid-2">
+        <label>
+          <span class="label">ID No.</span>
+          <input class="input" name="id" required />
+        </label>
+        <label>
+          <span class="label">Program</span>
+          <input class="input" name="program" required />
+        </label>
+      </div>
+      <div class="grid-2">
+        <label>
+          <span class="label">First name</span>
+          <input class="input" name="fname" required />
+        </label>
+        <label>
+          <span class="label">Last name</span>
+          <input class="input" name="lname" required />
+        </label>
+      </div>
+      <label>
+        <span class="label">Email</span>
+        <input class="input" type="email" name="email" required />
+      </label>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Upload Attendance -->
+  <dialog class="modal" id="modal-attendance">
+    <form class="modal-card" id="formAttendance">
+      <h3 class="modal-title">Upload attendance CSV</h3>
+      <label>
+        <span class="label">Event</span>
+        <select class="input" name="event" id="attEvent" required></select>
+      </label>
+      <label>
+        <span class="label">CSV file</span>
+        <input class="input" type="file" name="file" accept=".csv" required />
+      </label>
+      <p class="help">Expected columns: student_id, full_name, check_in_time.</p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+        <button type="submit" class="btn btn-primary">Upload</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ============ Script ============ -->
+  
+</body>
+</html>
