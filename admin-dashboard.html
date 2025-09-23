@@ -36,13 +36,11 @@
         </a>
       </nav>
 
-<div class="sidebar-footer">
- 
-  <form id="logoutForm" data-redirect="login.html">
-    <button type="submit" class="btn btn-ghost" style="width:100%;">Sign out</button>
-  </form>
-</div>
-
+      <div class="sidebar-footer">
+        <form action="/auth/logout" method="post">
+          <button type="submit" class="btn btn-ghost" style="width:100%;">Sign out</button>
+        </form>
+      </div>
     </aside>
 
     <!-- ============ Main ============ -->
@@ -400,6 +398,270 @@
   </dialog>
 
   <!-- ============ Script ============ -->
-  
+  <script>
+    // -----------------------
+    // Mock data (replace with API)
+    // -----------------------
+    const db = {
+      events: [
+        { id: 1, title: "Wellness Fair", date: "2025-10-15", slots: 300, reserved: 248, status: "Open" },
+        { id: 2, title: "CS Dept. Hackathon", date: "2025-10-21", slots: 120, reserved: 117, status: "Filling" },
+        { id: 3, title: "Campus Concert", date: "2025-11-04", slots: 600, reserved: 600, status: "Full" }
+      ],
+      users: [
+        { id: "2025-12345", fname: "Ella", lname: "Santos", email: "ella@bpsu.edu.ph", program: "BSIT" },
+        { id: "2025-23456", fname: "Mark", lname: "Dela Cruz", email: "mark@bpsu.edu.ph", program: "BSCS" }
+      ],
+      reservations: [
+        { id: 3481, student: "Ella Santos", event: "Wellness Fair", date: "2025-10-10", amount: 150, status: "Paid" },
+        { id: 3482, student: "Mark Dela Cruz", event: "CS Dept. Hackathon", date: "2025-10-10", amount: 250, status: "Pending" },
+        { id: 3483, student: "Jenny Robles", event: "Campus Concert", date: "2025-10-09", amount: 200, status: "Failed" }
+      ],
+      attendance: [
+        { event: "Wellness Fair", date: "2025-10-15", checked: 248, total: 300 },
+        { event: "CS Dept. Hackathon", date: "2025-10-21", checked: 117, total: 120 }
+      ],
+      billing: [
+        { invoice: "INV-1001", student: "Ella Santos", event: "Wellness Fair", amount: 150, status: "Paid" },
+        { invoice: "INV-1002", student: "Mark Dela Cruz", event: "CS Dept. Hackathon", amount: 250, status: "Pending" }
+      ]
+    };
+
+    // -----------------------
+    // Helpers
+    // -----------------------
+    const $ = (sel, root = document) => root.querySelector(sel);
+    const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+    function setActive(target) {
+      $$(".route").forEach(sec => sec.hidden = true);
+      $("#route-" + target)?.removeAttribute("hidden");
+      $$("#nav .nav-link").forEach(a => a.classList.toggle("active", a.dataset.target === target));
+      $("#content").focus({ preventScroll: true });
+    }
+
+    function pill(status) {
+      const cls =
+        status === "Paid" || status === "Open" ? "success" :
+        status === "Pending" || status === "Filling" ? "warning" : "danger";
+      return `<span class="pill ${cls}">${status}</span>`;
+    }
+
+    // -----------------------
+    // Renderers
+    // -----------------------
+    function renderEvents() {
+      const rows = db.events.map(e => `
+        <tr>
+          <td>${e.title}</td>
+          <td>${new Date(e.date).toLocaleDateString()}</td>
+          <td>${e.slots}</td>
+          <td>${e.reserved}</td>
+          <td>${pill(e.status)}</td>
+          <td class="t-right"><button class="link" data-edit-event="${e.id}">Edit</button></td>
+        </tr>
+      `).join("");
+      $("#tableEvents tbody").innerHTML = rows;
+      $("#tableUpcoming tbody").innerHTML = rows;
+      $("#attEvent").innerHTML = db.events.map(e => `<option>${e.title}</option>`).join("");
+    }
+
+    function renderReservations() {
+      const rows = db.reservations.map(r => `
+        <tr>
+          <td>${r.student}</td>
+          <td>${r.event}</td>
+          <td>${new Date(r.date).toLocaleDateString()}</td>
+          <td>₱${r.amount}</td>
+          <td>${pill(r.status)}</td>
+          <td class="t-right"><button class="link" data-open-res="${r.id}">Open</button></td>
+        </tr>
+      `).join("");
+      $("#tableReservations tbody").innerHTML = rows;
+      $("#tableRecentReservations tbody").innerHTML = rows;
+    }
+
+    function renderAttendance() {
+      const rows = db.attendance.map(a => `
+        <tr>
+          <td>${a.event}</td>
+          <td>${new Date(a.date).toLocaleDateString()}</td>
+          <td>${a.checked}</td>
+          <td>${a.total}</td>
+          <td class="t-right"><button class="link" disabled>View</button></td>
+        </tr>
+      `).join("");
+      $("#tableAttendance tbody").innerHTML = rows;
+
+      const week = 78, last = 71, sem = 83; // mock %; compute on backend later
+      $("#barWeek").style.setProperty("--value", week + "%");
+      $("#barLast").style.setProperty("--value", last + "%");
+      $("#barSem").style.setProperty("--value", sem + "%");
+      $("#barWeekVal").textContent = week + "%";
+      $("#barLastVal").textContent = last + "%";
+      $("#barSemVal").textContent = sem + "%";
+    }
+
+    function renderUsers() {
+      const rows = db.users.map(u => `
+        <tr>
+          <td>${u.id}</td>
+          <td>${u.fname} ${u.lname}</td>
+          <td>${u.email}</td>
+          <td>${u.program}</td>
+          <td class="t-right"><button class="link" data-edit-user="${u.id}">Edit</button></td>
+        </tr>
+      `).join("");
+      $("#tableUsers tbody").innerHTML = rows;
+    }
+
+    function renderBilling() {
+      const rows = db.billing.map(b => `
+        <tr>
+          <td>${b.invoice}</td>
+          <td>${b.student}</td>
+          <td>${b.event}</td>
+          <td>₱${b.amount}</td>
+          <td>${pill(b.status)}</td>
+          <td class="t-right"><button class="link" disabled>Open</button></td>
+        </tr>
+      `).join("");
+      $("#tableBilling tbody").innerHTML = rows;
+    }
+
+    function renderKPIs() {
+      $("#kpiStudents").textContent = db.users.length.toLocaleString();
+      $("#kpiStudentsSub").textContent = "sample data";
+      $("#kpiEvents").textContent = db.events.length;
+      $("#kpiEventsSub").textContent = "this month";
+      $("#kpiReservations").textContent = db.reservations.length;
+      $("#kpiReservationsSub").textContent = "sample data";
+      $("#kpiPending").textContent = db.billing.filter(b => b.status === "Pending").length;
+      $("#kpiPendingSub").textContent = "requires follow-up";
+    }
+
+    // -----------------------
+    // Routing
+    // -----------------------
+    function go(hash) {
+      const target = (hash || location.hash || "#overview").replace("#", "");
+      setActive(target);
+    }
+    window.addEventListener("hashchange", () => go());
+    $$("#nav .nav-link").forEach(a => a.addEventListener("click", (e) => {
+      const t = e.currentTarget.getAttribute("data-target");
+      if (t) setTimeout(() => setActive(t), 0);
+    }));
+
+    // mobile sidebar toggle
+    const btn = document.getElementById("menuBtn");
+    const layout = document.querySelector(".layout");
+    btn?.addEventListener("click", () => {
+      const open = layout.classList.toggle("sidebar-open");
+      btn.setAttribute("aria-expanded", String(open));
+    });
+
+    // -----------------------
+    // Modal controller (explicit close + submit)
+    // -----------------------
+    function openModal(id) {
+      const d = document.getElementById(id);
+      if (!d.open) d.showModal();
+    }
+    function closeModal(node) {
+      const d = node.closest("dialog");
+      if (d && d.open) d.close();
+    }
+
+    // Open modal buttons
+    document.addEventListener("click", (e) => {
+      const opener = e.target.closest("[data-open]");
+      if (!opener) return;
+      const targetId = opener.getAttribute("data-open");
+      const route = opener.getAttribute("data-route");
+      if (route) {
+        location.hash = "#" + route; // go to Users when Add student from overview
+        setActive(route);
+      }
+      openModal(targetId);
+    });
+
+    // Cancel buttons
+    document.addEventListener("click", (e) => {
+      const closer = e.target.closest("[data-close]");
+      if (!closer) return;
+      closeModal(closer);
+      // No extra routing here; if opened from overview with data-route=users, we already switched.
+    });
+
+    // Prevent default form submit (SPA); handle save explicitly
+    $("#formEvent")?.addEventListener("submit", (ev) => {
+      ev.preventDefault();
+      const fd = new FormData(ev.currentTarget);
+      const evObj = {
+        id: Date.now(),
+        title: fd.get("title"),
+        date: fd.get("date"),
+        slots: +fd.get("slots"),
+        reserved: 0,
+        status: fd.get("status")
+      };
+      db.events.unshift(evObj);
+      renderEvents();
+      closeModal(ev.currentTarget);
+    });
+
+    $("#formUser")?.addEventListener("submit", (ev) => {
+      ev.preventDefault();
+      const fd = new FormData(ev.currentTarget);
+      db.users.unshift({
+        id: fd.get("id"),
+        fname: fd.get("fname"),
+        lname: fd.get("lname"),
+        email: fd.get("email"),
+        program: fd.get("program")
+      });
+      renderUsers();
+      renderKPIs();
+      closeModal(ev.currentTarget);
+    });
+
+    $("#formAttendance")?.addEventListener("submit", (ev) => {
+      ev.preventDefault();
+      // In real app: send CSV to /admin/attendance/upload
+      alert("Attendance file queued for upload (demo).");
+      closeModal(ev.currentTarget);
+    });
+
+    // -----------------------
+    // Search (client-side demo)
+    // -----------------------
+    $("#searchInput")?.addEventListener("input", (e) => {
+      const q = e.target.value.toLowerCase();
+      const filtered = db.events.filter(ev => ev.title.toLowerCase().includes(q));
+      const rows = filtered.map(e => `
+        <tr>
+          <td>${e.title}</td>
+          <td>${new Date(e.date).toLocaleDateString()}</td>
+          <td>${e.slots}</td>
+          <td>${e.reserved}</td>
+          <td>${pill(e.status)}</td>
+          <td class="t-right"><button class="link" data-edit-event="${e.id}">Edit</button></td>
+        </tr>
+      `).join("");
+      $("#tableEvents tbody").innerHTML = rows || `<tr><td colspan="6">No matches</td></tr>`;
+    });
+
+    // -----------------------
+    // Init
+    // -----------------------
+    renderEvents();
+    renderReservations();
+    renderAttendance();
+    renderUsers();
+    renderBilling();
+    renderKPIs();
+    go(); // initial route
+  </script>
 </body>
 </html>

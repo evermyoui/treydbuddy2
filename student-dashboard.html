@@ -34,11 +34,10 @@
       </nav>
 
       <div class="sidebar-footer">
-      <form id="logoutForm" data-redirect="login.html">
-    <button type="submit" class="btn btn-ghost" style="width:100%;">Sign out</button>
-  </form>
-</div>
-
+        <form action="/auth/logout" method="post">
+          <button type="submit" class="btn btn-ghost" style="width:100%;">Sign out</button>
+        </form>
+      </div>
     </aside>
 
     <!-- ============ Main ============ -->
@@ -184,7 +183,7 @@
           </article>
         </section>
 
-        <!-- ===== Profile  ===== -->
+        <!-- ===== Profile (NEW) ===== -->
         <section class="route" id="route-profile" hidden>
           <article class="card profile-card">
             <div class="profile-head">
@@ -243,7 +242,8 @@
                 <input class="input" name="address" id="pfAddress" disabled />
               </label>
 
-             
+              <!-- Optional: Change password trigger (front-end only; no modal added) -->
+              <!-- <button class="btn btn-ghost" type="button" disabled>Change password</button> -->
             </form>
           </article>
         </section>
@@ -251,7 +251,7 @@
     </div>
   </div>
 
- 
+  <!-- ============ Modals from earlier (Reserve / Schedule) ============ -->
   <dialog class="modal" id="modal-reserve">
     <form class="modal-card" id="formReserve">
       <h3 class="modal-title">Reserve a ticket</h3>
@@ -303,6 +303,289 @@
     </form>
   </dialog>
 
-  
+  <!-- ============ Script ============ -->
+  <script>
+    // -----------------------
+    // Mock data (replace with API)
+    // -----------------------
+    const db = {
+      profile: {
+        studentId: "2025-12345",
+        program: "BSIT",
+        fname: "Ella",
+        lname: "Santos",
+        email: "ella@student.bpsu.edu.ph",
+        phone: "0917 555 1234",
+        address: "Balanga, Bataan"
+      },
+      events: [
+        { id: 1, title: "Wellness Fair", date: "2025-10-15", slots: 300, reserved: 248, status: "Open" },
+        { id: 2, title: "CS Dept. Hackathon", date: "2025-10-21", slots: 120, reserved: 117, status: "Filling" },
+        { id: 3, title: "Campus Concert", date: "2025-11-04", slots: 600, reserved: 600, status: "Full" }
+      ],
+      myReservations: [
+        { id: 701, event: "Wellness Fair", date: "2025-10-10", amount: 150, status: "Paid" },
+        { id: 702, event: "CS Dept. Hackathon", date: "2025-10-10", amount: 250, status: "Pending" }
+      ],
+      attendance: [
+        { event: "Wellness Fair", date: "2025-10-15", status: "Present" },
+        { event: "Orientation", date: "2025-09-03", status: "Present" }
+      ],
+      billing: [
+        { invoice: "INV-2001", event: "Hackathon", amount: 250, status: "Pending" },
+        { invoice: "INV-2002", event: "Concert", amount: 200, status: "Paid" }
+      ]
+    };
+
+    // -----------------------
+    // Helpers
+    // -----------------------
+    const $ = (sel, root = document) => root.querySelector(sel);
+    const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
+
+    function setActive(target) {
+      $$(".route").forEach(sec => sec.hidden = true);
+      $("#route-" + target).hidden = false;
+      $$("#nav .nav-link").forEach(a => a.classList.toggle("active", a.dataset.target === target));
+      $("#content").focus({ preventScroll: true });
+    }
+
+    function pill(status) {
+      const cls = status === "Paid" || status === "Present" || status === "Open" ? "success"
+                : status === "Pending" || status === "Filling" ? "warning"
+                : "danger";
+      return `<span class="pill ${cls}">${status}</span>`;
+    }
+
+    function initials(name) {
+      const parts = name.trim().split(/\s+/);
+      return (parts[0][0] || "") + (parts[1]?.[0] || "");
+    }
+
+    // -----------------------
+    // Renderers
+    // -----------------------
+    function renderEvents() {
+      const rows = db.events.map(e => `
+        <tr>
+          <td>${e.title}</td>
+          <td>${new Date(e.date).toLocaleDateString()}</td>
+          <td>${e.slots}</td>
+          <td>${e.reserved}</td>
+          <td>${pill(e.status)}</td>
+          <td class="t-right">
+            <button class="link" ${e.status === "Full" ? "disabled" : `data-reserve="${e.id}"`}>Reserve</button>
+          </td>
+        </tr>
+      `).join("");
+      $("#tblEvents tbody").innerHTML = rows;
+      $("#kpiUpcoming").textContent = db.events.filter(e => e.status !== "Full").length;
+    }
+
+    function renderMyReservations() {
+      const rows = db.myReservations.map(r => `
+        <tr>
+          <td>${r.event}</td>
+          <td>${new Date(r.date).toLocaleDateString()}</td>
+          <td>₱${r.amount}</td>
+          <td>${pill(r.status)}</td>
+          <td class="t-right">
+            ${r.status === "Pending" ? `<button class="link" data-open="modal-schedule">Schedule</button>` : `<span class="help">—</span>`}
+          </td>
+        </tr>
+      `).join("");
+      $("#tblMyReservations tbody").innerHTML = rows;
+      $("#kpiMyRes").textContent = db.myReservations.length;
+    }
+
+    function renderAttendance() {
+      const rows = db.attendance.map(a => `
+        <tr>
+          <td>${a.event}</td>
+          <td>${new Date(a.date).toLocaleDateString()}</td>
+          <td>${pill(a.status)}</td>
+        </tr>
+      `).join("");
+      $("#tblAttendance tbody").innerHTML = rows;
+    }
+
+    function renderBilling() {
+      const rows = db.billing.map(b => `
+        <tr>
+          <td>${b.invoice}</td>
+          <td>${b.event}</td>
+          <td>₱${b.amount}</td>
+          <td>${pill(b.status)}</td>
+          <td class="t-right">
+            ${b.status === "Pending" ? `<button class="link" data-open="modal-schedule">Schedule</button>` : `<span class="help">—</span>`}
+          </td>
+        </tr>
+      `).join("");
+      $("#tblBilling tbody").innerHTML = rows;
+      $("#kpiDue").textContent = db.billing.filter(b => b.status === "Pending").length;
+      $("#scheduleInvoice").innerHTML = db.billing
+        .filter(b => b.status === "Pending")
+        .map(b => `<option value="${b.invoice}">${b.invoice} — ${b.event}</option>`)
+        .join("");
+    }
+
+    function renderProfile() {
+      const p = db.profile;
+      $("#pfId").value = p.studentId;
+      $("#pfProgram").value = p.program;
+      $("#pfFname").value = p.fname;
+      $("#pfLname").value = p.lname;
+      $("#pfEmail").value = p.email;
+      $("#pfPhone").value = p.phone || "";
+      $("#pfAddress").value = p.address || "";
+
+      const name = `${p.fname} ${p.lname}`.trim();
+      $("#profileName").textContent = name || "Student";
+      $("#profileEmail").textContent = p.email;
+      $("#profileAvatar").textContent = initials(name || "ST");
+      $("#avatarInitials").textContent = initials(name || "ST");
+    }
+
+    // -----------------------
+    // Profile edit / save
+    // -----------------------
+    let editing = false;
+
+    function setProfileEditing(on) {
+      editing = on;
+      const fields = ["pfProgram","pfFname","pfLname","pfEmail","pfPhone","pfAddress"];
+      fields.forEach(id => { const el = document.getElementById(id); el.disabled = !on; });
+      document.getElementById("btnEditProfile").hidden = on;
+      document.getElementById("btnCancelEdit").hidden = !on;
+      document.getElementById("btnSaveProfile").hidden = !on;
+    }
+
+    document.getElementById("btnEditProfile").addEventListener("click", () => setProfileEditing(true));
+
+    document.getElementById("btnCancelEdit").addEventListener("click", () => {
+      setProfileEditing(false);
+      renderProfile(); // reset fields to last saved data
+    });
+
+    document.getElementById("btnSaveProfile").addEventListener("click", () => {
+      // Validate minimal fields
+      const email = document.getElementById("pfEmail").value.trim();
+      if (!email || !email.includes("@")) { alert("Please enter a valid email."); return; }
+
+      // Save to mock state (replace with POST /student/profile later)
+      db.profile = {
+        studentId: document.getElementById("pfId").value,
+        program: document.getElementById("pfProgram").value.trim(),
+        fname: document.getElementById("pfFname").value.trim(),
+        lname: document.getElementById("pfLname").value.trim(),
+        email,
+        phone: document.getElementById("pfPhone").value.trim(),
+        address: document.getElementById("pfAddress").value.trim()
+      };
+      setProfileEditing(false);
+      renderProfile();
+      // In real app: show a small success toast or inline note (omitted per your no-notification guidance)
+    });
+
+    // -----------------------
+    // Routing
+    // -----------------------
+    function go(hash) {
+      const target = (hash || location.hash || "#events").replace("#", "");
+      setActive(target);
+    }
+    window.addEventListener("hashchange", () => go());
+    $$("#nav .nav-link").forEach(a => a.addEventListener("click", (e) => {
+      const t = e.currentTarget.getAttribute("data-target");
+      if (t) setTimeout(() => setActive(t), 0);
+    }));
+
+    // mobile sidebar toggle
+    const btn = document.getElementById("menuBtn");
+    const layout = document.querySelector(".layout");
+    btn?.addEventListener("click", () => {
+      const open = layout.classList.toggle("sidebar-open");
+      btn.setAttribute("aria-expanded", String(open));
+    });
+
+    // -----------------------
+    // Modals
+    // -----------------------
+    function openModal(id) {
+      const d = document.getElementById(id);
+      if (!d.open) d.showModal();
+    }
+    function closeModal(node) {
+      const d = node.closest("dialog");
+      if (d && d.open) d.close();
+    }
+
+    document.addEventListener("click", (e) => {
+      const reserveBtn = e.target.closest("[data-reserve]");
+      if (reserveBtn) {
+        const id = +reserveBtn.getAttribute("data-reserve");
+        const ev = db.events.find(x => x.id === id);
+        $("#reserveEvent").value = ev.title;
+        openModal("modal-reserve");
+      }
+      const opener = e.target.closest("[data-open]");
+      if (opener) openModal(opener.getAttribute("data-open"));
+      const closer = e.target.closest("[data-close]");
+      if (closer) closeModal(closer);
+    });
+
+    // Reserve form
+    $("#formReserve")?.addEventListener("submit", (ev) => {
+      ev.preventDefault();
+      const fd = new FormData(ev.currentTarget);
+      db.myReservations.unshift({
+        id: Date.now(),
+        event: fd.get("event"),
+        date: new Date().toISOString().slice(0,10),
+        amount: 0,
+        status: fd.get("payment") === "Full" ? "Paid" : "Pending"
+      });
+      renderMyReservations();
+      closeModal(ev.currentTarget);
+      location.hash = "#my-reservations";
+    });
+
+    // Schedule form
+    $("#formSchedule")?.addEventListener("submit", (ev) => {
+      ev.preventDefault();
+      alert("Payment schedule saved (demo).");
+      closeModal(ev.currentTarget);
+      location.hash = "#billing";
+    });
+
+    // Search (filter events client-side)
+    $("#searchInput")?.addEventListener("input", (e) => {
+      const q = e.target.value.toLowerCase();
+      const filtered = db.events.filter(ev => ev.title.toLowerCase().includes(q));
+      const rows = filtered.map(e => `
+        <tr>
+          <td>${e.title}</td>
+          <td>${new Date(e.date).toLocaleDateString()}</td>
+          <td>${e.slots}</td>
+          <td>${e.reserved}</td>
+          <td>${pill(e.status)}</td>
+          <td class="t-right">
+            <button class="link" ${e.status === "Full" ? "disabled" : `data-reserve="${e.id}"`}>Reserve</button>
+          </td>
+        </tr>
+      `).join("");
+      $("#tblEvents tbody").innerHTML = rows || `<tr><td colspan="6">No matches</td></tr>`;
+    });
+
+    // -----------------------
+    // Init
+    // -----------------------
+    renderEvents();
+    renderMyReservations();
+    renderAttendance();
+    renderBilling();
+    renderProfile();
+    go();
+  </script>
 </body>
 </html>
