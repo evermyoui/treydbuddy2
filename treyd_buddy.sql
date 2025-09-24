@@ -92,7 +92,8 @@ CREATE TABLE `user_table` (
   `first_name` varchar(20) NOT NULL,
   `email` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
-  `role` varchar(10) DEFAULT NULL
+  `role` varchar(10) DEFAULT NULL,
+  `program` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
