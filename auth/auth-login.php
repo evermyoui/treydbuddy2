@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
-require __DIR__ . '/config.php';
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') { header('Location: /treydbuddy2/login.php'); exit; }
+require dirname(__DIR__) . '/config.php';
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') { header('Location: /treydbuddy2/auth/login.php'); exit; }
 
 $role = strtolower(trim($_POST['role'] ?? ''));
 $email = strtolower(trim($_POST['email'] ?? ''));
 $password = $_POST['password'] ?? '';
 
-if (!in_array($role, ['student','admin'], true)) { set_flash('error', 'Select a valid role.'); header('Location: /treydbuddy2/login.php'); exit; }
-if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $password === '') { set_flash('error', 'Invalid email or password.'); header('Location: /treydbuddy2/login.php'); exit; }
+if (!in_array($role, ['student','admin'], true)) { set_flash('error', 'Select a valid role.'); header('Location: /treydbuddy2/auth/login.php'); exit; }
+if (!filter_var($email, FILTER_VALIDATE_EMAIL) || $password === '') { set_flash('error', 'Invalid email or password.'); header('Location: /treydbuddy2/auth/login.php'); exit; }
 
 $pdo = db();
 $st = $pdo->prepare('SELECT user_id, first_name, last_name, email, password, role, program FROM user_table WHERE email = ? LIMIT 1');
@@ -36,9 +36,9 @@ if ($user && password_verify($password, $user['password'])) {
 
     // Redirect according to role (adjust paths to match your project)
     if (isset($user['role']) && $user['role'] === 'admin') {
-        header('Location: /treydbuddy2/admin-dashboard.php');
+        header('Location: /treydbuddy2/admin/admin-dashboard.php');
     } else {
-        header('Location: /treydbuddy2/student-dashboard.php');
+        header('Location: /treydbuddy2/student/student-dashboard.php');
     }
     exit;
 } else {
@@ -49,7 +49,7 @@ if ($user && password_verify($password, $user['password'])) {
     // Provide the same failure path you already use (flash, redirect, etc.)
     // Example:
     set_flash('error', 'Invalid credentials. Please try again.');
-    header('Location: /treydbuddy2/login.php');
+    header('Location: /treydbuddy2/auth/login.php');
     exit;
 }
 

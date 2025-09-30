@@ -22,9 +22,9 @@ function db(): PDO {
 }
 
 function require_role(string $role): void {
-    if (!isset($_SESSION['user'])) { header('Location: /treydbuddy2/login.php'); exit; }
+    if (!isset($_SESSION['user'])) { header('Location: /treydbuddy2/auth/login.php'); exit; }
     if ($role !== 'any' && (($_SESSION['user']['role'] ?? '') !== $role)) {
-        header('Location: ' . (($_SESSION['user']['role'] ?? '') === 'admin' ? '/treydbuddy2/admin-dashboard.php' : '/treydbuddy2/student-dashboard.php'));
+        header('Location: ' . (($_SESSION['user']['role'] ?? '') === 'admin' ? '/treydbuddy2/admin/admin-dashboard.php' : '/treydbuddy2/student/student-dashboard.php'));
         exit;
     }
 }

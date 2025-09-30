@@ -1,6 +1,6 @@
 <?php
-require __DIR__ . '/config.php';
-if (isset($_SESSION['user'])) { header('Location: ' . (($_SESSION['user']['role'] ?? '') === 'admin' ? '/treydbuddy2/admin-dashboard.php' : '/treydbuddy2/student-dashboard.php')); exit; }
+require dirname(__DIR__) . '/config.php';
+if (isset($_SESSION['user'])) { header('Location: ' . (($_SESSION['user']['role'] ?? '') === 'admin' ? '/treydbuddy2/admin/admin-dashboard.php' : '/treydbuddy2/student/student-dashboard.php')); exit; }
 $error = get_flash('error') ?? '';
 ?>
 <!DOCTYPE html>
@@ -9,26 +9,26 @@ $error = get_flash('error') ?? '';
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>TreydBuddy — Create Account</title>
-  <link rel="stylesheet" href="./assets/auth.css" />
+  <link rel="stylesheet" href="../assets/auth.css" />
 </head>
 <body>
   <main class="auth-shell">
     <section class="auth" role="region" aria-label="TreydBuddy Registration">
       <aside class="auth-hero">
-        <a class="brand" href="login.php" aria-label="TreydBuddy Home">
+        <a class="brand" href="/treydbuddy2/auth/login.php" aria-label="TreydBuddy Home">
           <span class="logo">TB</span>
           <span>TreydBuddy</span>
         </a>
         <h1 class="hero-title">Join TreydBuddy</h1>
         <p class="hero-sub">Create your account to reserve tickets, track attendance, and stay updated on campus events.</p>
-        <p class="hero-footnote">Need to sign in? <a href="login.php" style="color:#ff0000; text-decoration:none;">Go to Login</a></p>
+        <p class="hero-footnote">Need to sign in? <a href="/treydbuddy2/auth/login.php" style="color:#ff0000; text-decoration:none;">Go to Login</a></p>
       </aside>
       <div class="auth-form">
         <?php if ($error): ?><div class="alert alert-error"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
-        <form class="form-card" action="/treydbuddy2/auth-register.php" method="post" novalidate>
+        <form class="form-card" action="/treydbuddy2/auth/auth-register.php" method="post" novalidate>
           <div class="form-header">
             <h2>Create your account</h2>
-            <a href="login.php">I have an account</a>
+            <a href="/treydbuddy2/auth/login.php">I have an account</a>
           </div>
           <div class="form-row">
             <div>

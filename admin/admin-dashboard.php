@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/config.php';
+require dirname(__DIR__) . '/config.php';
 require_role('admin');
 ?>
 <!DOCTYPE html>
@@ -8,7 +8,7 @@ require_role('admin');
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>TreydBuddy — Admin Dashboard</title>
-  <link rel="stylesheet" href="./assets/dashboard.css" />
+  <link rel="stylesheet" href="../assets/dashboard.css" />
 </head>
 <body>
   <?php include __DIR__ . '/admin-dashboard.html'; ?>

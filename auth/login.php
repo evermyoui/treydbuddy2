@@ -1,6 +1,6 @@
 <?php
-require __DIR__ . '/config.php';
-if (isset($_SESSION['user'])) { header('Location: ' . (($_SESSION['user']['role'] ?? '') === 'admin' ? '/treydbuddy2/admin-dashboard.php' : '/treydbuddy2/student-dashboard.php')); exit; }
+require dirname(__DIR__) . '/config.php';
+if (isset($_SESSION['user'])) { header('Location: ' . (($_SESSION['user']['role'] ?? '') === 'admin' ? '/treydbuddy2/admin/admin-dashboard.php' : '/treydbuddy2/student/student-dashboard.php')); exit; }
 $error = get_flash('error') ?? '';
 ?>
 <!DOCTYPE html>
@@ -9,7 +9,7 @@ $error = get_flash('error') ?? '';
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>TreydBuddy — Login</title>
-  <link rel="stylesheet" href="./assets/auth.css" />
+  <link rel="stylesheet" href="../assets/auth.css" />
 </head>
 <body>
   <main class="auth-shell">
@@ -24,10 +24,10 @@ $error = get_flash('error') ?? '';
       </aside>
       <div class="auth-form">
         <?php if ($error): ?><div class="alert alert-error"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
-        <form class="form-card" action="/treydbuddy2/auth-login.php" method="post" novalidate>
+        <form class="form-card" action="/treydbuddy2/auth/auth-login.php" method="post" novalidate>
           <div class="form-header">
             <h2>Welcome back</h2>
-            <a href="register.php">Create an account</a>
+            <a href="/treydbuddy2/auth/register.php">Create an account</a>
           </div>
           <div class="form-row">
             <div>

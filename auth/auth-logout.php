@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-require __DIR__ . '/config.php';
+require dirname(__DIR__) . '/config.php';
 if (!in_array($_SERVER['REQUEST_METHOD'], ['POST','GET'], true)) { http_response_code(405); exit('Method Not Allowed'); }
 $_SESSION = [];
 if (ini_get('session.use_cookies')) {
@@ -8,7 +8,7 @@ if (ini_get('session.use_cookies')) {
   setcookie(session_name(), '', time()-42000, $p['path'],$p['domain'],$p['secure'],$p['httponly']);
 }
 session_destroy();
-header('Location: /treydbuddy2/login.php');
+header('Location: /treydbuddy2/auth/login.php');
 exit;
 ?>
 
