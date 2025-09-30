@@ -195,8 +195,6 @@
                   <tr>
                     <th>Event ID</th>
                     <th>Title</th>
-                    <th>Event ID</th>
-                    <th>Title</th>
                     <th>Date</th>
                     <th>Slots</th>
                     <th>Reserved</th>
@@ -549,8 +547,13 @@
       const d = document.getElementById(id);
       if (!d.open) d.showModal();
     }
-    function closeModal(node) {
-      const d = node.closest("dialog");
+    function closeModal(nodeOrId) {
+      let d = null;
+      if (typeof nodeOrId === 'string') {
+        d = document.getElementById(nodeOrId);
+      } else if (nodeOrId && typeof nodeOrId.closest === 'function') {
+        d = nodeOrId.closest('dialog');
+      }
       if (d && d.open) d.close();
     }
 
@@ -579,23 +582,23 @@
     $("#formEvent")?.addEventListener("submit", async (ev) => {
       ev.preventDefault();
       const fd = new FormData(ev.currentTarget);
-      const payload = new URLSearchParams({
-        event_name: String(fd.get('title')||''),
-        event_date: String(fd.get('date')||''),
-        location: '',
-        description: ''
-      });
+      const payload = new URLSearchParams();
+      payload.set('event_name', String(fd.get('title')||''));
+      payload.set('event_date', String(fd.get('date')||''));
+      payload.set('location', '');
+      payload.set('description', '');
       try {
         const res = await fetch('/treydbuddy2/api/events-create.php', { method: 'POST', body: payload });
         const data = await res.json();
-        if (!res.ok) throw new Error(data?.error||'Failed');
+        if (!res.ok) throw new Error(data?.detail || data?.error || 'Failed');
         // Reload events from API
         const listRes = await fetch('/treydbuddy2/api/events-list.php');
         db.events = await listRes.json();
         renderEvents();
-        closeModal(ev.currentTarget);
+        closeModal('modal-event');
       } catch (e) {
-        alert('Failed to save event');
+        console.error(e);
+        alert('Failed to save event: ' + (e && e.message ? e.message : 'Unknown error'));
       }
     });
 

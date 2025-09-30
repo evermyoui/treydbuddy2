@@ -14,23 +14,25 @@ try {
   $pdo = db();
   $pdo->beginTransaction();
 
-  // Next event id generator: EVENT-001, EVENT-002, ...
-  $last = $pdo->query("SELECT event_id FROM event_table WHERE event_id LIKE 'EVENT-%' ORDER BY LENGTH(event_id) DESC, event_id DESC LIMIT 1")->fetchColumn();
-  if ($last && preg_match('/^EVENT-(\d{3,})$/', $last, $m)) {
-    $seq = (int)$m[1] + 1;
-  } else {
-    $seq = 1;
+  // Parse body (supports x-www-form-urlencoded and JSON)
+  $ct = strtolower($_SERVER['CONTENT_TYPE'] ?? '');
+  if (str_contains($ct, 'application/json')) {
+    $raw = file_get_contents('php://input');
+    $json = json_decode($raw, true) ?: [];
+    $_POST = $json + $_POST;
   }
-  $nextId = sprintf('EVENT-%03d', $seq);
+
+  // Next event id generator: EVENT-001, EVENT-002, ... using numeric suffix
+  $max = $pdo->query("SELECT MAX(CAST(SUBSTRING(event_id, 7) AS UNSIGNED)) FROM event_table WHERE event_id LIKE 'EVENT-%'")->fetchColumn();
+  $seq = (int)$max + 1;
+  $nextId = sprintf('EVENT-%03d', max(1, $seq));
 
   $name = trim($_POST['event_name'] ?? '');
   $date = trim($_POST['event_date'] ?? '');
   $location = trim($_POST['location'] ?? '');
   $description = trim($_POST['description'] ?? '');
 
-  if ($name === '' || $date === '') {
-    throw new RuntimeException('Missing required fields');
-  }
+  if ($name === '' || $date === '') { throw new RuntimeException('Missing required fields'); }
 
   $stmt = $pdo->prepare('INSERT INTO event_table (event_id, event_name, event_date, location, description) VALUES (?,?,?,?,?)');
   $stmt->execute([$nextId, $name, $date, $location ?: null, $description ?: null]);
@@ -40,7 +42,7 @@ try {
 } catch (Throwable $e) {
   if ($pdo?->inTransaction()) { $pdo->rollBack(); }
   http_response_code(400);
-  echo json_encode(['error' => 'Failed to create event']);
+  echo json_encode(['error' => 'Failed to create event', 'detail' => $e->getMessage()]);
 }
 ?>
 
