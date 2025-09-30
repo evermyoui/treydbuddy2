@@ -200,18 +200,18 @@ body {
 /* ===== Content ===== */
 
 .content {
-  padding: 20px;
+  padding: 16px;
   display: grid;
-  gap: 20px;
+  column-gap: 10px;
+  row-gap: 6px;
 }
-
 .card {
   background: var(--surface);
   border: 1px solid var(--line2);
   border-radius: var(--radius);
   box-shadow: var(--shadow-md);
-  padding: 18px;
-  margin: 5px 0;
+  padding: 20px;
+  margin: 12px 0 16px 0;
 }
 
 .btn {
@@ -260,7 +260,7 @@ body {
 .cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  gap: 18px;
 }
 
 @media (max-width: 900px) {
