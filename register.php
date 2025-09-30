@@ -1,3 +1,8 @@
+<?php
+require __DIR__ . '/config.php';
+if (isset($_SESSION['user'])) { header('Location: ' . (($_SESSION['user']['role'] ?? '') === 'admin' ? '/treydbuddy2/admin-dashboard.php' : '/treydbuddy2/student-dashboard.php')); exit; }
+$error = get_flash('error') ?? '';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,46 +14,22 @@
 <body>
   <main class="auth-shell">
     <section class="auth" role="region" aria-label="TreydBuddy Registration">
-      <!-- Left Panel -->
       <aside class="auth-hero">
         <a class="brand" href="login.php" aria-label="TreydBuddy Home">
           <span class="logo">TB</span>
           <span>TreydBuddy</span>
         </a>
-
         <h1 class="hero-title">Join TreydBuddy</h1>
-        <p class="hero-sub">
-          Create your account to reserve tickets, track attendance, and stay updated on campus events.
-        </p>
-
-        <!-- <ul class="hero-list">
-          <li>
-            <span class="check">✓</span>
-            <div>Separate roles for Students and Admins.</div>
-          </li>
-          <li>
-            <span class="check">✓</span>
-            <div>Student profile details for smoother event check-ins.</div>
-          </li>
-          <li>
-            <span class="check">✓</span>
-            <div>Works with billing/reservation module</div>
-          </li>
-        </ul> -->
-
-        <p class="hero-footnote">
-          Need to sign in? <a href="login.html" style="color:#ff0000; text-decoration:none;">Go to Login</a>
-        </p>
+        <p class="hero-sub">Create your account to reserve tickets, track attendance, and stay updated on campus events.</p>
+        <p class="hero-footnote">Need to sign in? <a href="login.php" style="color:#ff0000; text-decoration:none;">Go to Login</a></p>
       </aside>
-
-      <!-- Right Panel -->
       <div class="auth-form">
+        <?php if ($error): ?><div class="alert alert-error"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
         <form class="form-card" action="/treydbuddy2/auth-register.php" method="post" novalidate>
           <div class="form-header">
             <h2>Create your account</h2>
-            <a href="login.html">I have an account</a>
+            <a href="login.php">I have an account</a>
           </div>
-
           <div class="form-row">
             <div>
               <label class="label" for="reg-role">Register as</label>
@@ -58,7 +39,6 @@
                 <option value="admin">Admin</option>
               </select>
             </div>
-
             <div class="grid-2">
               <div>
                 <label class="label" for="fname">First Name</label>
@@ -69,7 +49,6 @@
                 <input id="lname" name="last_name" class="input" type="text" autocomplete="family-name" placeholder="Dela Cruz" required />
               </div>
             </div>
-
             <div class="grid-2">
               <div>
                 <label class="label" for="studentno">Student / Employee No.</label>
@@ -80,12 +59,10 @@
                 <input id="program" name="program" class="input" type="text" placeholder="e.g., BSIT" required />
               </div>
             </div>
-
             <div>
               <label class="label" for="reg-email">Email</label>
               <input id="reg-email" name="email" class="input" type="email" inputmode="email" autocomplete="email" placeholder="name@student.bpsu.edu.ph" required />
             </div>
-
             <div class="grid-2">
               <div>
                 <label class="label" for="reg-pass">Password</label>
@@ -96,15 +73,9 @@
                 <input id="reg-pass2" name="password_confirm" class="input" type="password" autocomplete="new-password" placeholder="Re-enter password" minlength="8" required />
               </div>
             </div>
-
             <div class="actions">
-              <label style="display:flex; align-items:center; gap:8px;">
-             
-              </label>
               <button class="btn btn-primary" type="submit">Create Account</button>
             </div>
-
-          
           </div>
         </form>
       </div>
@@ -112,3 +83,5 @@
   </main>
 </body>
 </html>
+
+

@@ -34,7 +34,7 @@
       </nav>
 
       <div class="sidebar-footer">
-        <form action="/auth/logout" method="post">
+        <form action="/treydbuddy2/auth-logout.php" method="post">
           <button type="submit" class="btn btn-ghost" style="width:100%;">Sign out</button>
         </form>
       </div>
@@ -305,36 +305,13 @@
 
   <!-- ============ Script ============ -->
   <script>
-    // -----------------------
-    // Mock data (replace with API)
-    // -----------------------
+    // Data containers (empty by default; fill via API later)
     const db = {
-      profile: {
-        studentId: "2025-12345",
-        program: "BSIT",
-        fname: "Ella",
-        lname: "Santos",
-        email: "ella@student.bpsu.edu.ph",
-        phone: "0917 555 1234",
-        address: "Balanga, Bataan"
-      },
-      events: [
-        { id: 1, title: "Wellness Fair", date: "2025-10-15", slots: 300, reserved: 248, status: "Open" },
-        { id: 2, title: "CS Dept. Hackathon", date: "2025-10-21", slots: 120, reserved: 117, status: "Filling" },
-        { id: 3, title: "Campus Concert", date: "2025-11-04", slots: 600, reserved: 600, status: "Full" }
-      ],
-      myReservations: [
-        { id: 701, event: "Wellness Fair", date: "2025-10-10", amount: 150, status: "Paid" },
-        { id: 702, event: "CS Dept. Hackathon", date: "2025-10-10", amount: 250, status: "Pending" }
-      ],
-      attendance: [
-        { event: "Wellness Fair", date: "2025-10-15", status: "Present" },
-        { event: "Orientation", date: "2025-09-03", status: "Present" }
-      ],
-      billing: [
-        { invoice: "INV-2001", event: "Hackathon", amount: 250, status: "Pending" },
-        { invoice: "INV-2002", event: "Concert", amount: 200, status: "Paid" }
-      ]
+      profile: {},
+      events: [],
+      myReservations: [],
+      attendance: [],
+      billing: []
     };
 
     // -----------------------
@@ -366,7 +343,7 @@
     // Renderers
     // -----------------------
     function renderEvents() {
-      const rows = db.events.map(e => `
+      const rows = (db.events || []).map(e => `
         <tr>
           <td>${e.title}</td>
           <td>${new Date(e.date).toLocaleDateString()}</td>
@@ -379,11 +356,11 @@
         </tr>
       `).join("");
       $("#tblEvents tbody").innerHTML = rows;
-      $("#kpiUpcoming").textContent = db.events.filter(e => e.status !== "Full").length;
+      $("#kpiUpcoming").textContent = (db.events || []).filter(e => e.status !== "Full").length;
     }
 
     function renderMyReservations() {
-      const rows = db.myReservations.map(r => `
+      const rows = (db.myReservations || []).map(r => `
         <tr>
           <td>${r.event}</td>
           <td>${new Date(r.date).toLocaleDateString()}</td>
@@ -395,11 +372,11 @@
         </tr>
       `).join("");
       $("#tblMyReservations tbody").innerHTML = rows;
-      $("#kpiMyRes").textContent = db.myReservations.length;
+      $("#kpiMyRes").textContent = (db.myReservations || []).length;
     }
 
     function renderAttendance() {
-      const rows = db.attendance.map(a => `
+      const rows = (db.attendance || []).map(a => `
         <tr>
           <td>${a.event}</td>
           <td>${new Date(a.date).toLocaleDateString()}</td>
@@ -410,7 +387,7 @@
     }
 
     function renderBilling() {
-      const rows = db.billing.map(b => `
+      const rows = (db.billing || []).map(b => `
         <tr>
           <td>${b.invoice}</td>
           <td>${b.event}</td>
@@ -422,26 +399,26 @@
         </tr>
       `).join("");
       $("#tblBilling tbody").innerHTML = rows;
-      $("#kpiDue").textContent = db.billing.filter(b => b.status === "Pending").length;
-      $("#scheduleInvoice").innerHTML = db.billing
+      $("#kpiDue").textContent = (db.billing || []).filter(b => b.status === "Pending").length;
+      $("#scheduleInvoice").innerHTML = (db.billing || [])
         .filter(b => b.status === "Pending")
         .map(b => `<option value="${b.invoice}">${b.invoice} — ${b.event}</option>`)
         .join("");
     }
 
     function renderProfile() {
-      const p = db.profile;
-      $("#pfId").value = p.studentId;
-      $("#pfProgram").value = p.program;
-      $("#pfFname").value = p.fname;
-      $("#pfLname").value = p.lname;
-      $("#pfEmail").value = p.email;
+      const p = db.profile || {};
+      $("#pfId").value = p.studentId || "";
+      $("#pfProgram").value = p.program || "";
+      $("#pfFname").value = p.fname || "";
+      $("#pfLname").value = p.lname || "";
+      $("#pfEmail").value = p.email || "";
       $("#pfPhone").value = p.phone || "";
       $("#pfAddress").value = p.address || "";
 
-      const name = `${p.fname} ${p.lname}`.trim();
+      const name = `${p.fname || ""} ${p.lname || ""}`.trim();
       $("#profileName").textContent = name || "Student";
-      $("#profileEmail").textContent = p.email;
+      $("#profileEmail").textContent = p.email || "";
       $("#profileAvatar").textContent = initials(name || "ST");
       $("#avatarInitials").textContent = initials(name || "ST");
     }
@@ -584,7 +561,21 @@
     renderMyReservations();
     renderAttendance();
     renderBilling();
-    renderProfile();
+
+    // Fetch profile data from backend and update UI
+    fetch('/treydbuddy2/get-profile.php', {
+      credentials: 'include' // send cookies/session if needed
+    })
+      .then(res => res.json())
+      .then(profile => {
+        db.profile = profile;
+        renderProfile();
+      })
+      .catch(err => {
+        console.error('Failed to load profile:', err);
+        // Optionally show an error message or fallback
+      });
+
     go();
   </script>
 </body>

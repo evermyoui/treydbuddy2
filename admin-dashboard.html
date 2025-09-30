@@ -37,7 +37,7 @@
       </nav>
 
       <div class="sidebar-footer">
-        <form action="/auth/logout" method="post">
+        <form action="/treydbuddy2/auth-logout.php" method="post">
           <button type="submit" class="btn btn-ghost" style="width:100%;">Sign out</button>
         </form>
       </div>
@@ -399,32 +399,13 @@
 
   <!-- ============ Script ============ -->
   <script>
-    // -----------------------
-    // Mock data (replace with API)
-    // -----------------------
+    // Data containers (empty by default; fill via API later)
     const db = {
-      events: [
-        { id: 1, title: "Wellness Fair", date: "2025-10-15", slots: 300, reserved: 248, status: "Open" },
-        { id: 2, title: "CS Dept. Hackathon", date: "2025-10-21", slots: 120, reserved: 117, status: "Filling" },
-        { id: 3, title: "Campus Concert", date: "2025-11-04", slots: 600, reserved: 600, status: "Full" }
-      ],
-      users: [
-        { id: "2025-12345", fname: "Ella", lname: "Santos", email: "ella@bpsu.edu.ph", program: "BSIT" },
-        { id: "2025-23456", fname: "Mark", lname: "Dela Cruz", email: "mark@bpsu.edu.ph", program: "BSCS" }
-      ],
-      reservations: [
-        { id: 3481, student: "Ella Santos", event: "Wellness Fair", date: "2025-10-10", amount: 150, status: "Paid" },
-        { id: 3482, student: "Mark Dela Cruz", event: "CS Dept. Hackathon", date: "2025-10-10", amount: 250, status: "Pending" },
-        { id: 3483, student: "Jenny Robles", event: "Campus Concert", date: "2025-10-09", amount: 200, status: "Failed" }
-      ],
-      attendance: [
-        { event: "Wellness Fair", date: "2025-10-15", checked: 248, total: 300 },
-        { event: "CS Dept. Hackathon", date: "2025-10-21", checked: 117, total: 120 }
-      ],
-      billing: [
-        { invoice: "INV-1001", student: "Ella Santos", event: "Wellness Fair", amount: 150, status: "Paid" },
-        { invoice: "INV-1002", student: "Mark Dela Cruz", event: "CS Dept. Hackathon", amount: 250, status: "Pending" }
-      ]
+      events: [],
+      users: [],
+      reservations: [],
+      attendance: [],
+      billing: []
     };
 
     // -----------------------
@@ -451,7 +432,7 @@
     // Renderers
     // -----------------------
     function renderEvents() {
-      const rows = db.events.map(e => `
+      const rows = (db.events || []).map(e => `
         <tr>
           <td>${e.title}</td>
           <td>${new Date(e.date).toLocaleDateString()}</td>
@@ -467,7 +448,7 @@
     }
 
     function renderReservations() {
-      const rows = db.reservations.map(r => `
+      const rows = (db.reservations || []).map(r => `
         <tr>
           <td>${r.student}</td>
           <td>${r.event}</td>
@@ -482,7 +463,7 @@
     }
 
     function renderAttendance() {
-      const rows = db.attendance.map(a => `
+      const rows = (db.attendance || []).map(a => `
         <tr>
           <td>${a.event}</td>
           <td>${new Date(a.date).toLocaleDateString()}</td>
@@ -493,17 +474,13 @@
       `).join("");
       $("#tableAttendance tbody").innerHTML = rows;
 
-      const week = 78, last = 71, sem = 83; // mock %; compute on backend later
-      $("#barWeek").style.setProperty("--value", week + "%");
-      $("#barLast").style.setProperty("--value", last + "%");
-      $("#barSem").style.setProperty("--value", sem + "%");
-      $("#barWeekVal").textContent = week + "%";
-      $("#barLastVal").textContent = last + "%";
-      $("#barSemVal").textContent = sem + "%";
+      // Clear KPI bars until real data is provided
+      ["#barWeek","#barLast","#barSem"].forEach(sel => $(sel).style.setProperty("--value", "0%"));
+      ["#barWeekVal","#barLastVal","#barSemVal"].forEach(sel => $(sel).textContent = "—");
     }
 
     function renderUsers() {
-      const rows = db.users.map(u => `
+      const rows = (db.users || []).map(u => `
         <tr>
           <td>${u.id}</td>
           <td>${u.fname} ${u.lname}</td>
@@ -516,7 +493,7 @@
     }
 
     function renderBilling() {
-      const rows = db.billing.map(b => `
+      const rows = (db.billing || []).map(b => `
         <tr>
           <td>${b.invoice}</td>
           <td>${b.student}</td>
@@ -530,14 +507,14 @@
     }
 
     function renderKPIs() {
-      $("#kpiStudents").textContent = db.users.length.toLocaleString();
-      $("#kpiStudentsSub").textContent = "sample data";
-      $("#kpiEvents").textContent = db.events.length;
-      $("#kpiEventsSub").textContent = "this month";
-      $("#kpiReservations").textContent = db.reservations.length;
-      $("#kpiReservationsSub").textContent = "sample data";
-      $("#kpiPending").textContent = db.billing.filter(b => b.status === "Pending").length;
-      $("#kpiPendingSub").textContent = "requires follow-up";
+      $("#kpiStudents").textContent = (db.users || []).length.toLocaleString();
+      $("#kpiStudentsSub").textContent = "";
+      $("#kpiEvents").textContent = (db.events || []).length;
+      $("#kpiEventsSub").textContent = "";
+      $("#kpiReservations").textContent = (db.reservations || []).length;
+      $("#kpiReservationsSub").textContent = "";
+      $("#kpiPending").textContent = (db.billing || []).filter(b => b.status === "Pending").length;
+      $("#kpiPendingSub").textContent = "";
     }
 
     // -----------------------
@@ -638,7 +615,7 @@
     // -----------------------
     $("#searchInput")?.addEventListener("input", (e) => {
       const q = e.target.value.toLowerCase();
-      const filtered = db.events.filter(ev => ev.title.toLowerCase().includes(q));
+      const filtered = (db.events || []).filter(ev => ev.title.toLowerCase().includes(q));
       const rows = filtered.map(e => `
         <tr>
           <td>${e.title}</td>
