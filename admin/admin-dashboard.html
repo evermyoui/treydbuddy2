@@ -193,6 +193,9 @@
               <table class="table" id="tableEvents">
                 <thead>
                   <tr>
+                    <th>Event ID</th>
+                    <th>Title</th>
+                    <th>Event ID</th>
                     <th>Title</th>
                     <th>Date</th>
                     <th>Slots</th>
@@ -434,17 +437,18 @@
     function renderEvents() {
       const rows = (db.events || []).map(e => `
         <tr>
-          <td>${e.title}</td>
-          <td>${new Date(e.date).toLocaleDateString()}</td>
-          <td>${e.slots}</td>
-          <td>${e.reserved}</td>
-          <td>${pill(e.status)}</td>
-          <td class="t-right"><button class="link" data-edit-event="${e.id}">Edit</button></td>
+          <td>${e.event_id || e.id || ''}</td>
+          <td>${e.title || e.event_name}</td>
+          <td>${new Date(e.date || e.event_date).toLocaleDateString()}</td>
+          <td>${e.slots ?? 0}</td>
+          <td>${e.reserved ?? 0}</td>
+          <td>${pill(e.status || 'Open')}</td>
+          <td class="t-right"><button class="link" data-edit-event="${e.id || e.event_id}">Edit</button></td>
         </tr>
       `).join("");
       $("#tableEvents tbody").innerHTML = rows;
       $("#tableUpcoming tbody").innerHTML = rows;
-      $("#attEvent").innerHTML = db.events.map(e => `<option>${e.title}</option>`).join("");
+      $("#attEvent").innerHTML = (db.events||[]).map(e => `<option value="${e.event_id || e.id}">${e.title || e.event_name}</option>`).join("");
     }
 
     function renderReservations() {
@@ -572,20 +576,27 @@
     });
 
     // Prevent default form submit (SPA); handle save explicitly
-    $("#formEvent")?.addEventListener("submit", (ev) => {
+    $("#formEvent")?.addEventListener("submit", async (ev) => {
       ev.preventDefault();
       const fd = new FormData(ev.currentTarget);
-      const evObj = {
-        id: Date.now(),
-        title: fd.get("title"),
-        date: fd.get("date"),
-        slots: +fd.get("slots"),
-        reserved: 0,
-        status: fd.get("status")
-      };
-      db.events.unshift(evObj);
-      renderEvents();
-      closeModal(ev.currentTarget);
+      const payload = new URLSearchParams({
+        event_name: String(fd.get('title')||''),
+        event_date: String(fd.get('date')||''),
+        location: '',
+        description: ''
+      });
+      try {
+        const res = await fetch('/treydbuddy2/api/events-create.php', { method: 'POST', body: payload });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error||'Failed');
+        // Reload events from API
+        const listRes = await fetch('/treydbuddy2/api/events-list.php');
+        db.events = await listRes.json();
+        renderEvents();
+        closeModal(ev.currentTarget);
+      } catch (e) {
+        alert('Failed to save event');
+      }
     });
 
     $("#formUser")?.addEventListener("submit", (ev) => {
@@ -632,7 +643,11 @@
     // -----------------------
     // Init
     // -----------------------
-    renderEvents();
+    // Initial load from API
+    fetch('/treydbuddy2/api/events-list.php')
+      .then(r => r.json())
+      .then(list => { db.events = list; renderEvents(); renderKPIs(); })
+      .catch(() => { renderEvents(); });
     renderReservations();
     renderAttendance();
     renderUsers();

@@ -345,18 +345,18 @@
     function renderEvents() {
       const rows = (db.events || []).map(e => `
         <tr>
-          <td>${e.title}</td>
-          <td>${new Date(e.date).toLocaleDateString()}</td>
-          <td>${e.slots}</td>
-          <td>${e.reserved}</td>
-          <td>${pill(e.status)}</td>
+          <td>${e.title || e.event_name}</td>
+          <td>${new Date(e.date || e.event_date).toLocaleDateString()}</td>
+          <td>${e.slots ?? 0}</td>
+          <td>${e.reserved ?? 0}</td>
+          <td>${pill(e.status || 'Open')}</td>
           <td class="t-right">
-            <button class="link" ${e.status === "Full" ? "disabled" : `data-reserve="${e.id}"`}>Reserve</button>
+            <button class="link" ${ (e.status||'Open') === "Full" ? "disabled" : `data-reserve="${e.id || e.event_id}"`}>Reserve</button>
           </td>
         </tr>
       `).join("");
       $("#tblEvents tbody").innerHTML = rows;
-      $("#kpiUpcoming").textContent = (db.events || []).filter(e => e.status !== "Full").length;
+      $("#kpiUpcoming").textContent = (db.events || []).filter(e => (e.status||'Open') !== "Full").length;
     }
 
     function renderMyReservations() {
@@ -557,7 +557,11 @@
     // -----------------------
     // Init
     // -----------------------
-    renderEvents();
+    // Load events from backend
+    fetch('/treydbuddy2/api/events-list.php')
+      .then(r => r.json())
+      .then(list => { db.events = list; renderEvents(); })
+      .catch(() => renderEvents());
     renderMyReservations();
     renderAttendance();
     renderBilling();
