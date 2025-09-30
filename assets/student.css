@@ -211,6 +211,7 @@ body {
   border-radius: var(--radius);
   box-shadow: var(--shadow-md);
   padding: 18px;
+  margin: 5px 0;
 }
 
 .btn {
